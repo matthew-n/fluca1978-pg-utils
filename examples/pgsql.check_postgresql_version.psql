@@ -11,33 +11,17 @@
 
  */
 SELECT
-EXISTS ( SELECT setting
-         FROM   pg_settings
-         WHERE  name = 'server_version_num'
-         AND    setting::int >= 120000
-         AND    setting::int  < 130000
-       )
-       AS pg_version_12
-, EXISTS ( SELECT setting
-         FROM   pg_settings
-         WHERE  name = 'server_version_num'
-         AND    setting::int >= 110000
-         AND    setting::int  < 120000
-         )
-         AS pg_version_11
-, EXISTS ( SELECT setting
-         FROM   pg_settings
-         WHERE  name = 'server_version_num'
-         AND    setting::int >= 100000
-         AND    setting::int <  110000
-         )
-         AS pg_version_10
-, EXISTS ( SELECT setting
-         FROM   pg_settings
-         WHERE  name = 'server_version_num'
-         AND    setting::int < 100000
-         )
-         AS pg_version_less_than_10
+    pg_ver_num <@ int4range(120000,130000) as pg_version_12,
+    pg_ver_num <@ int4range(110000,120000) as pg_version_11,
+    pg_ver_num <@ int4range(100000,110000) as pg_version_10,
+    pg_ver_num <@ int4range(null,100000) as pg_version_less_than_10
+FROM (
+  SELECT 
+    setting::int
+  FROM   pg_settings
+  WHERE  name = 'server_version_num'
+) AS x(pg_ver_num)
+
 \gset
 
 
